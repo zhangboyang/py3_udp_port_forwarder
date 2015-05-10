@@ -13,14 +13,15 @@ from socket import SOCK_DGRAM, socket, getaddrinfo
 from select import select
 from time import time
 
-# print config
-print('L: ip=%-*s port=%s'%(max(len(L[0]), len(R[0])), L[0], L[1]))
-print('R: ip=%-*s port=%s'%(max(len(L[0]), len(R[0])), R[0], R[1]))
-print()
-
 # query address
 afL, stL, pL, cL, addrL = getaddrinfo(L[0], L[1], type = SOCK_DGRAM)[0]
 afR, stR, pR, cR, addrR = getaddrinfo(R[0], R[1], type = SOCK_DGRAM)[0]
+
+# print query result
+maxiplen = max(len(addrL[0]), len(addrR[0]))
+print('L: ip=%-*s port=%s'%(maxiplen, addrL[0], addrL[1]))
+print('R: ip=%-*s port=%s'%(maxiplen, addrR[0], addrR[1]))
+print()
 
 # setup socket
 sockL, sockR = socket(afL, stL), socket(afR, stR)
