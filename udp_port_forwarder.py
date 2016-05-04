@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#  UDP port forwarder by ZBY 20150509
+#  UDP port forwarder by ZBY 20160504
 #  user1   Lport           Rport   user2
 #  addrC <=======> addrL <=======> addrR
 #               sockL sockR
@@ -8,6 +8,18 @@ L = ('::', '10800')
 R = ('127.0.0.1', '10800')
 TIMEINTERVAL = 1
 BUFSIZE = 65536
+XORKEY = b""
+
+
+
+def do_xor(s):
+    if len(XORKEY) == 0:
+        return s
+    t = b""
+    for i in range(len(s)):
+        t += bytes([s[i] ^ XORKEY[i % len(XORKEY)]])
+    return t
+
 
 from socket import SOCK_DGRAM, socket, getaddrinfo
 from select import select
@@ -37,11 +49,13 @@ while True:
     for fd in select([fdL, fdR], [], [], max(0, ddl - time()))[0]:
         if fd == fdL:
             data, addrC = sockL.recvfrom(BUFSIZE)
+            data = do_xor(data)
             sockR.sendto(data, addrR)
             lenL += len(data)
             cntL += 1
         elif fd == fdR:
             data = sockR.recv(BUFSIZE)
+            data = do_xor(data)
             sockL.sendto(data, addrC)
             lenR += len(data)
             cntR += 1
